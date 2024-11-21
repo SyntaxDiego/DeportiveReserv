@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\RoleController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 
@@ -19,3 +20,4 @@ Route::get('/', function () {
 });
 
 Route::resource('user', UserController::class);
+Route::resource('role', RoleController::class);
