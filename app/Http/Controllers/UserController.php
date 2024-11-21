@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
@@ -13,7 +15,8 @@ class UserController extends Controller
      */
     public function index()
     {
-        //
+        $users = User::all();
+        return view('user.index', compact('users'));
     }
 
     /**
@@ -23,7 +26,7 @@ class UserController extends Controller
      */
     public function create()
     {
-        //
+        return view('user.create');
     }
 
     /**
@@ -34,7 +37,19 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'name' => 'required|max:255|min:3',
+            'email' => 'required|unique:users,email',
+            'password' => 'required|min:8|max:50'
+        ]);
+
+        $user = new User();
+        $user->name = $request->name;
+        $user->email = $request->email;
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        return redirect()->route("user.index");
     }
 
     /**
@@ -43,9 +58,9 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(User $user)
     {
-        //
+        return view('user.show', compact('user'));
     }
 
     /**
@@ -54,9 +69,9 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(User $user)
     {
-        //
+        return view('user.edit', compact('user'));
     }
 
     /**
@@ -66,9 +81,21 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, User $user)
     {
-        //
+        $request->validate([
+            'name' => 'required|max:255|min:3',
+            'email' => 'required|unique:users,email,' . $user->id,
+            'password' => 'nullable|min:8|max:50'
+        ]);
+
+        $user->name = $request->name;
+        $user->email = $request->email;
+        if ($request->filled('password')) {
+            $user->password = Hash::make($request->password);
+        }
+        $user->save();
+        return redirect()->route('user.index');
     }
 
     /**
@@ -77,8 +104,9 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(User $user)
     {
-        //
+        $user->delete();
+        return redirect()->route('user.index');
     }
 }
